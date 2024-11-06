@@ -8,6 +8,7 @@ let EditProductComponent = () => {
     const { id } = useParams();
     let navigate = useNavigate();
 
+
     let [formData, setFormData] = useState({})
 
     useEffect(() => {
@@ -102,6 +103,11 @@ let EditProductComponent = () => {
                                     } }
                         />
                     </Form.Item>
+
+
+
+
+
 
                     <Button type="primary" onClick={clickEditProduct} block >Edit Product</Button>
                 </Card>

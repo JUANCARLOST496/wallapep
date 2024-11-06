@@ -5,10 +5,12 @@ import EditProductComponent from "./Components/Products/EditProductComponent";
 import DetailsProductComponent from "./Components/Products/DetailsProductComponent";
 import CreateProductComponent from "./Components/Products/CreateProductComponent";
 import ListMyProductsComponent from "./Components/Products/ListMyProductsComponent";
+import ListMyTransactionsComponent from "./Components/Products/ListMyTransactionsComponent";
 import {Route, Routes, Link, useNavigate, useLocation } from "react-router-dom"
 import {Layout, Menu, Avatar, Typography, Col, Row, notification } from 'antd';
 import {FireOutlined, LoginOutlined} from '@ant-design/icons';
 import {useEffect, useState} from "react";
+import MainPage from "./main";
 
 let App = () => {
     const [api, contextHolder] = notification.useNotification();
@@ -99,7 +101,13 @@ let App = () => {
                     <Col xs= {18} sm={19} md={20} lg={21} xl = {22}>
                         {!login &&
                             <Menu theme="dark" mode="horizontal" items={[
-                                {key: "logo", label: <img src="/logo.png" width="40" height="40"/>},
+                                {key: "logo",
+                                    label: (
+                                        <Link to="/">
+                                            <img src="/logo.png" width="40" height="40" alt="Logo" style={{ marginRight: '20px' }}/>
+                                            Main
+                                        </Link>
+                                    )},
                                 {key: "menuLogin", icon: <LoginOutlined/>, label: <Link to="/login">Login</Link>},
                                 {key: "menuRegister", label: <Link to="/register">Register</Link>},
                             ]}>
@@ -108,7 +116,13 @@ let App = () => {
 
                         {login &&
                             <Menu theme="dark" mode="horizontal" items={[
-                                {key: "logo", label: <img src="/logo.png" width="40" height="40"/>},
+                                {key: "logo",
+                                    label: (
+                                <Link to="/">
+                                <img src="/logo.png" width="40" height="40" alt="Logo" style={{ marginRight: '20px' }}/>
+                                     Main
+                                </Link>
+                                )},
                                 {key: "menuProducts", label: <Link to="/products">Products</Link>},
                                 {key: "menuMyProduct", label: <Link to="/products/own">My Products</Link> },
                                 {key: "menuCreateProduct", label: <Link to="/products/create">Sell</Link> },
@@ -134,7 +148,7 @@ let App = () => {
                 <div className="site-layout-content">
                     <Routes>
                         <Route path="/" element={
-                            <h1>Index</h1>
+                           <MainPage/>
                         }/>
                         <Route path="/register" element={
                             <CreateUserComponent openNotification={openNotification}/>
@@ -156,6 +170,9 @@ let App = () => {
                         }></Route>
                         <Route path="/products/own" element={
                             <ListMyProductsComponent />
+                        }></Route>
+                        <Route path="/transactions/own" element={
+                            <ListMyTransactionsComponent />
                         }></Route>
                     </Routes>
                 </div>

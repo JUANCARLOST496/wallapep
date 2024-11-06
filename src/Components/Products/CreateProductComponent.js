@@ -1,8 +1,9 @@
 import {useState} from "react";
 import {modifyStateProperty} from "../../Utils/UtilsState";
-import {Card, Input, Button, Row, Col, Form, Typography, Upload} from "antd";
+import {Card, Input, Button, Row, Col, Form, Typography, Upload, Select} from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import { actions } from "../../Reducers/reducerCountSlice"
+const { Option } = Select;
 
 let CreateProductComponent = () => {
     const countGlobalState1 = useSelector(state => state.reducerCount);
@@ -10,6 +11,18 @@ let CreateProductComponent = () => {
     const dispatch = useDispatch();
 
     let [formData, setFormData] = useState({})
+    let [selectedCategory, setSelectedCategory] = useState(null);
+
+
+    const categories = [
+        "Electronics",
+        "Clothing and Fashion",
+        "Home and Kitchen",
+        "Toys and Games",
+        "Beauty and Personal Care",
+        "Sports and Outdoors",
+        "Books and Stationery"
+    ];
 
     let clickCreateProduct = async () => {
         let response = await fetch(
@@ -64,19 +77,6 @@ let CreateProductComponent = () => {
             <Col>
                 <Card title="Create product" style={{width: "500px"}}>
 
-                    <p> Global count1: { countGlobalState1 } </p>
-                    <button onClick={ () => { dispatch({type:"plus/count"}) } }> +1 </button>
-                    <button onClick={ () => { dispatch({type:"less/count"}) } }> -1 </button>
-                    <button
-                        onClick={ () => { dispatch({type:"modify/count", payload:999 }) } }>
-                        to 999 </button>
-
-                    <p> Global count2: { countGlobalState2 } </p>
-                    <button onClick={ () => { dispatch(actions.increment()) } }> +1 </button>
-                    <button onClick={ () => { dispatch(actions.decrement()) } }> -1 </button>
-                    <button
-                        onClick={ () => { dispatch(actions.modify(1)) } }>
-                        to 1 </button>
 
                     <Form.Item label="">
                         <Input onChange={
@@ -97,6 +97,19 @@ let CreateProductComponent = () => {
                             (i) => modifyStateProperty(
                                 formData, setFormData, "price", i.currentTarget.value)}
                                size="large" type="number" placeholder="price"></Input>
+                    </Form.Item>
+
+                    <Form.Item label="">
+                        <Select
+                            placeholder="Select Category"
+                            onChange={(value) => modifyStateProperty(formData, setFormData, "category", value)} // Aquí pasamos el valor directamente
+                            size="large">
+                            {categories.map((category) => (
+                                <Select.Option key={category} value={category}> {/* Asegúrate de usar Select.Option en lugar de Option */}
+                                    {category}
+                                </Select.Option>
+                            ))}
+                        </Select>
                     </Form.Item>
 
                     <Form.Item name="image">
