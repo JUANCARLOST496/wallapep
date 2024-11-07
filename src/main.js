@@ -5,18 +5,37 @@ import {useEffect, useState} from "react";
 
 let MainPage = () => {
 
+    const isLoggedIn = localStorage.getItem("apiKey") !== null;
+    const userEmail = isLoggedIn ? localStorage.getItem("email") || "User" : "";
 
-
-    const [randomElectronicsImage, setRandomElectronicsImage] = useState("");
+    const [randomImage, setRandomImage] = useState({
+        electronics: "",
+       clothing: "",
+        kitchen: "",
+        toys: "",
+        beauty: "",
+        sports: "",
+        book: ""
+    });
 
     useEffect(() => {
-        getRandomElectronicsImage(); // Llama a la función para obtener una imagen aleatoria
-    }, []);
+        if (isLoggedIn) {
+            console.log("Usuario logueado:", userEmail);
+            getRandomImageByCategory("Electronics", "electronics");
+            getRandomImageByCategory("Clothing and Fashion", "clothing");
+            getRandomImageByCategory("Home and Kitchen", "kitchen");
+            getRandomImageByCategory("Toys and Games", "toys");
+            getRandomImageByCategory("Beauty and Personal Care", "beauty");
+            getRandomImageByCategory("Sports and Outdoors", "sports");
+            getRandomImageByCategory("Books and Stationery", "book");
+        } else {
+            console.log("Usuario no está logueado");
+        }
+    }, [isLoggedIn]);
 
-    const getRandomElectronicsImage = async () => {
-        // Obtén todos los productos de la categoría "Electronics"
+    const getRandomImageByCategory = async (category, key) => {
         const response = await fetch(
-            `${process.env.REACT_APP_BACKEND_BASE_URL}/products?category=Electronics`, // Suponiendo que la API permite filtrar por categoría
+            `${process.env.REACT_APP_BACKEND_BASE_URL}/products`,
             {
                 method: "GET",
                 headers: {
@@ -27,27 +46,25 @@ let MainPage = () => {
 
         if (response.ok) {
             const products = await response.json();
+            const filteredProducts = products.filter(
+                (product) => product.category === category
+            );
 
-            // Selecciona un producto aleatorio de la lista de productos de "Electronics"
-            if (products.length > 0) {
-                const randomProduct = products[Math.floor(Math.random() * products.length)];
-
-                // Construye la URL de la imagen usando el ID del producto aleatorio
+            if (filteredProducts.length > 0) {
+                const randomProduct = filteredProducts[Math.floor(Math.random() * filteredProducts.length)];
                 const urlImage = `${process.env.REACT_APP_BACKEND_BASE_URL}/images/${randomProduct.id}.png`;
                 const existsImage = await checkURL(urlImage);
 
-                // Establece la URL de la imagen si existe, o usa una imagen de reserva
-                setRandomElectronicsImage(existsImage ? urlImage : "/laptop.png");
+                setRandomImage(prevState => ({
+                    ...prevState,
+                    [key]: existsImage ? urlImage : "/default.png"
+                }));
             }
         } else {
             const responseBody = await response.json();
-            const serverErrors = responseBody.errors;
-            serverErrors.forEach(e => {
-                console.log("Error: " + e.msg);
-            });
+            responseBody.errors.forEach(e => console.log("Error: " + e.msg));
         }
     };
-
 
     const checkURL = async (url) => {
         try {
@@ -116,7 +133,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src={randomElectronicsImage}
+                                    src={isLoggedIn ? randomImage.electronics : "/laptop.png"}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
@@ -133,7 +150,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src="/clothing.png"
+                                    src={isLoggedIn ? randomImage.clothing : "/clothing.png"}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
@@ -150,7 +167,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src="/kitchen.png"
+                                    src={isLoggedIn ? randomImage.kitchen : "/kitchen.png"}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
@@ -167,7 +184,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src="/toys.png"
+                                    src={isLoggedIn ? randomImage.kitchen : "/toys.png"}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
@@ -188,7 +205,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src="/beauty.png"
+                                    src={isLoggedIn ? randomImage.beauty : "/beauty.png"}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
@@ -205,7 +222,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src="/sports.png"
+                                    src={isLoggedIn ? randomImage.sports : "/sports.png"}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
@@ -222,7 +239,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src="/books.png"
+                                    src={isLoggedIn ? randomImage.book : "/books.png"}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
