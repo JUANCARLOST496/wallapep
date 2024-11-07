@@ -68,10 +68,11 @@ let UserProfileComponent = () => {
 
     return (
         <div style={{padding: '20px'}}>
-            {/* Perfil del Usuario */}
-            <Card title={`${userData?.name} ${userData?.surname}'s Profile`} style={{marginBottom: '20px'}}>
+
+            <Card title={`${userData?.name}'s Profile`} style={{marginBottom: '20px'}}>
+                <Typography.Paragraph>Name: {userData?.name}</Typography.Paragraph>
                 <Typography.Paragraph>Email: {userData?.email}</Typography.Paragraph>
-                <Typography.Paragraph>Phone: {userData?.phone}</Typography.Paragraph>
+
             </Card>
 
             {/* Transacciones del Usuario */}

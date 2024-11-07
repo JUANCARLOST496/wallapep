@@ -48,6 +48,7 @@ let ListMyTransactionsComponent = () => {
             let transactionsWithDetails = await Promise.all(jsonData.map(async (transaction) => {
                 transaction.key = transaction.id;
                 transaction.productTitle = await getProductTitle(transaction.productId); // Obtener título del producto
+                console.log("Seller ID:", transaction.sellerId);
                 return transaction;
             }));
             console.log(transactionsWithDetails);

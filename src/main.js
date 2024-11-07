@@ -7,6 +7,9 @@ let MainPage = () => {
 
     const isLoggedIn = localStorage.getItem("apiKey") !== null;
     const userEmail = isLoggedIn ? localStorage.getItem("email") || "User" : "";
+    const userId = isLoggedIn ? localStorage.getItem("country") || "ID no disponible" : "";
+
+
 
     const [randomImage, setRandomImage] = useState({
         electronics: "",
@@ -21,6 +24,7 @@ let MainPage = () => {
     useEffect(() => {
         if (isLoggedIn) {
             console.log("Usuario logueado:", userEmail);
+            console.log("ID del usuario:", userId);
             getRandomImageByCategory("Electronics", "electronics");
             getRandomImageByCategory("Clothing and Fashion", "clothing");
             getRandomImageByCategory("Home and Kitchen", "kitchen");
@@ -184,7 +188,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src={isLoggedIn ? randomImage.kitchen : "/toys.png"}
+                                    src={isLoggedIn ? randomImage.toys : "/toys.png"}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>

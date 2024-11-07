@@ -1,9 +1,9 @@
-import {useState, useEffect} from "react";
-import {useParams, useNavigate, Link} from 'react-router-dom';
-import {Typography, Card, Descriptions, Image, Button, Row, Col, notification} from 'antd';
-import {ShoppingOutlined} from '@ant-design/icons';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Typography, Card, Descriptions, Image, Button, Row, Col, notification } from 'antd';
+import { ShoppingOutlined } from '@ant-design/icons';
 
-let DetailsProductComponent = () => {
+const DetailsProductComponent = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState({});
@@ -26,15 +26,10 @@ let DetailsProductComponent = () => {
 
         if (response.ok) {
             const jsonData = await response.json();
-
-            // Construye la URL de la imagen usando el ID del producto
             const urlImage = `${process.env.REACT_APP_BACKEND_BASE_URL}/images/${id}.png`;
             const existsImage = await checkURL(urlImage);
-
-            // Agrega la URL de la imagen al producto o usa una imagen de reserva
             jsonData.image = existsImage ? urlImage : "/imageMockup.png";
-
-            setProduct(jsonData); // Establece el producto con la imagen en el estado
+            setProduct(jsonData);
         } else {
             const responseBody = await response.json();
             const serverErrors = responseBody.errors;
@@ -47,9 +42,9 @@ let DetailsProductComponent = () => {
     const checkURL = async (url) => {
         try {
             const response = await fetch(url);
-            return response.ok; // Devuelve true si la imagen existe
+            return response.ok;
         } catch (error) {
-            return false; // La imagen no existe o hay un error
+            return false;
         }
     };
 
@@ -74,7 +69,7 @@ let DetailsProductComponent = () => {
                     message: 'Compra Exitosa',
                     description: 'Gracias por su compra',
                     placement: 'topRight',
-                    duration: 3 // Duración de la notificación en segundos
+                    duration: 3
                 });
                 setTimeout(() => navigate('/'), 1000);
             }
@@ -87,26 +82,22 @@ let DetailsProductComponent = () => {
         }
     };
 
-    const clickReturn = () => {
-        navigate("/products");
-    };
-
     const labelProductPrice = product.price < 10000 ? "Oferta" : "No-Oferta";
 
     return (
         <Card justify="center">
             <Row gutter={16} align="middle" justify="center">
                 {/* Columna izquierda: Imagen del producto */}
-                <Col span={10}>
+                <Col xs={24} sm={12} md={10} lg={10}>
                     <Image
                         src={product.image}
                         alt={product.title}
-                        width={400} // Ajusta el tamaño directamente usando la propiedad width de Ant Design
+                        width="100%" // Ajuste el ancho a 100% para que sea responsivo
                     />
                 </Col>
 
                 {/* Columna derecha: Información del producto */}
-                <Col span={6}>
+                <Col xs={24} sm={12} md={8} lg={6}>
                     <Descriptions title={product.title} column={1}>
                         <Descriptions.Item label="Id">
                             {product.id}
@@ -121,7 +112,7 @@ let DetailsProductComponent = () => {
                             {labelProductPrice}
                         </Descriptions.Item>
                         <Descriptions.Item label="Seller">
-                            <Link to={`/profile/${product.sellerId}`}> {/* Enlace al perfil del vendedor */}
+                            <Link to={`/profile/${product.sellerId}`}>
                                 View Seller Profile
                             </Link>
                         </Descriptions.Item>
@@ -135,9 +126,6 @@ let DetailsProductComponent = () => {
             </Row>
         </Card>
     );
-
-
-
-}
+};
 
 export default DetailsProductComponent;

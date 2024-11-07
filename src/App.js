@@ -19,13 +19,44 @@ let App = () => {
     let navigate = useNavigate();
     let location = useLocation();
     let [login, setLogin] = useState(false);
-
+    const [sellerId, setSellerId] = useState(null);
     // for not using Layout.Header, Layout.Footer, etc...
     let {Header, Content, Footer} = Layout;
 
     useEffect(() => {
-        checkAll()
+        checkAll();
+        getMyTransactions();
     }, [])
+
+
+    let getMyTransactions = async () => {
+        let response = await fetch(
+            process.env.REACT_APP_BACKEND_BASE_URL + "/transactions/own/",
+            {
+                method: "GET",
+                headers: {
+                    "apikey": localStorage.getItem("apiKey")
+                }
+            }
+        );
+
+        if (response.ok) {
+            let jsonData = await response.json();
+            // Asigna el sellerId de la primera transacción (o ajusta según tu lógica)
+            if (jsonData.length > 0) {
+                setSellerId(jsonData[0].sellerId);
+                console.log("Seller ID:", jsonData[0].sellerId);
+            }
+        }
+    };
+
+    // Función para manejar el clic en el avatar
+    const handleAvatarClick = () => {
+        if (sellerId) {
+            console.log("Seller ID en clic:", sellerId);
+        }
+    };
+
 
     let checkAll = async () => {
         let isActive = await checkLoginIsActive()
@@ -136,10 +167,11 @@ let App = () => {
                     <Col xs= {6} sm={5} md = {4}  lg = {3} xl = {2}
                          style={{display: 'flex', flexDirection: 'row-reverse' }} >
                         { login ? (
-                            <Avatar size="large"
-                                    style={{ backgroundColor: "#ff0000", verticalAlign: 'middle', marginTop: 12  }}>
-                                { localStorage.getItem("email").charAt(0) }
-                            </Avatar>
+                            <Link to={`/profile/${sellerId}`} onClick={handleAvatarClick}>
+                                <Avatar size="large" style={{ backgroundColor: "#ff0000", verticalAlign: 'middle' }}>
+                                    {localStorage.getItem("email").charAt(0)}
+                                </Avatar>
+                            </Link>
                         ) : (
                             <Link to="/login"> <Text style={{ color:"#ffffff" }}>Login</Text></Link>
                         )}

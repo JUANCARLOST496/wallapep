@@ -1,112 +1,136 @@
-import {useState, useEffect } from "react";
-import { Table, Space } from 'antd';
+import { useState, useEffect } from "react";
+import { Table, Space, Typography } from 'antd';
 import { Link } from "react-router-dom";
-import { timestampToString} from "../../Utils/UtilsDates";
+import { timestampToString } from "../../Utils/UtilsDates";
 
-let ListMyProductsComponent = () => {
-    let [products, setProducts] = useState([])
+const ListMyProductsComponent = () => {
+    const [products, setProducts] = useState([]);
+    const { Text } = Typography;
 
     useEffect(() => {
         getMyProducts();
-    }, [])
+    }, []);
 
-    let deleteProduct = async (id) => {
-        let response = await fetch(
-            process.env.REACT_APP_BACKEND_BASE_URL+"/products/"+id,
+    const deleteProduct = async (id) => {
+        const response = await fetch(
+            `${process.env.REACT_APP_BACKEND_BASE_URL}/products/${id}`,
             {
                 method: "DELETE",
                 headers: {
                     "apikey": localStorage.getItem("apiKey")
                 },
-            });
+            }
+        );
 
-        if ( response.ok ){
-            let jsonData = await response.json();
-            if ( jsonData.deleted){
-                let productsAftherDelete = products.filter(p => p.id != id)
-                setProducts(productsAftherDelete)
+        if (response.ok) {
+            const jsonData = await response.json();
+            if (jsonData.deleted) {
+                const productsAfterDelete = products.filter(p => p.id !== id);
+                setProducts(productsAfterDelete);
             }
         } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
-            serverErrors.forEach( e => {
-                console.log("Error: "+e.msg)
-            })
+            const responseBody = await response.json();
+            const serverErrors = responseBody.errors;
+            serverErrors.forEach(e => {
+                console.log("Error: " + e.msg);
+            });
         }
-    }
+    };
 
-    let getMyProducts = async () => {
-        let response = await fetch(
-            process.env.REACT_APP_BACKEND_BASE_URL+"/products/own/",
+    const getMyProducts = async () => {
+        const response = await fetch(
+            `${process.env.REACT_APP_BACKEND_BASE_URL}/products/own/`,
             {
                 method: "GET",
                 headers: {
                     "apikey": localStorage.getItem("apiKey")
                 },
+            }
+        );
+
+        if (response.ok) {
+            const jsonData = await response.json();
+            jsonData.forEach(product => {
+                product.key = product.id;
             });
-
-        if ( response.ok ){
-            let jsonData = await response.json();
-            jsonData.map( product => {
-                product.key = product.id
-                return product
-            })
-            setProducts(jsonData)
+            setProducts(jsonData);
         } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
-            serverErrors.forEach( e => {
-                console.log("Error: "+e.msg)
-            })
+            const responseBody = await response.json();
+            const serverErrors = responseBody.errors;
+            serverErrors.forEach(e => {
+                console.log("Error: " + e.msg);
+            });
         }
-    }
+    };
 
-    let columns = [
+    const columns = [
         {
             title: "Id",
             dataIndex: "id",
+            responsive: ['md'],
+            render: (text) => <Text style={{ fontSize: '12px' }}>{text}</Text>,
         },
         {
             title: "Seller Id",
-            dataIndex: "sellerId"
+            dataIndex: "sellerId",
+            responsive: ['lg'],
+            render: (text) => <Text style={{ fontSize: '12px' }}>{text}</Text>,
         },
         {
             title: "Title",
-            dataIndex: "title"
+            dataIndex: "title",
+            ellipsis: true,
+            responsive: ['sm'],
+            render: (text) => <Text style={{ fontSize: '12px', fontWeight: '500' }}>{text}</Text>,
         },
         {
             title: "Description",
             dataIndex: "description",
+            ellipsis: true,
+            responsive: ['md'],
+            render: (text) => <Text style={{ fontSize: '11px' }}>{text}</Text>,
         },
         {
             title: "Price (€)",
             dataIndex: "price",
+            responsive: ['sm'],
+            render: (price) => <Text strong style={{ fontSize: '12px' }}>{price}</Text>,
         },
         {
             title: "Date",
             dataIndex: "date",
-            render: (date) => timestampToString(date)
+            responsive: ['md'],
+            render: (date) => <Text style={{ fontSize: '11px' }}>{timestampToString(date)}</Text>,
         },
         {
             title: "Buyer",
             dataIndex: [],
+            responsive: ['sm'],
             render: (product) =>
-               <Link to={"/user/"+product.buyerId}>{ product.buyerEmail }</Link>
+                <Link to={`/user/${product.buyerId}`} style={{ fontSize: '11px' }}>{product.buyerEmail}</Link>
         },
         {
             title: "Actions",
             dataIndex: "id",
             render: (id) =>
-                <Space.Compact direction="vertical">
-                    <Link to={"/products/edit/"+id}>Edit</Link>
-                    <Link to={"#"} onClick={() => deleteProduct(id)}>Delete</Link>
-                </Space.Compact>
+                <Space direction="vertical" size="small">
+                    <Link to={`/products/edit/${id}`} style={{ fontSize: '11px' }}>Edit</Link>
+                    <Link to="#" onClick={() => deleteProduct(id)} style={{ fontSize: '11px' }}>Delete</Link>
+                </Space>
         },
-    ]
+    ];
 
     return (
-        <Table columns={columns} dataSource={products}></Table>
-    )
-}
+        <Table
+            columns={columns}
+            dataSource={products}
+            pagination={{ pageSize: 5 }}
+            scroll={{ x: 'max-content' }}
+            size="small"
+            style={{ fontSize: '12px' }}
+            rowClassName={() => 'custom-row'}
+        />
+    );
+};
 
 export default ListMyProductsComponent;
