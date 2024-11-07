@@ -11,6 +11,7 @@ import {Layout, Menu, Avatar, Typography, Col, Row, notification } from 'antd';
 import {FireOutlined, LoginOutlined} from '@ant-design/icons';
 import {useEffect, useState} from "react";
 import MainPage from "./main";
+import UserProfile from "./Components/User/UserProfile";
 
 let App = () => {
     const [api, contextHolder] = notification.useNotification();
@@ -126,6 +127,7 @@ let App = () => {
                                 {key: "menuProducts", label: <Link to="/products">Products</Link>},
                                 {key: "menuMyProduct", label: <Link to="/products/own">My Products</Link> },
                                 {key: "menuCreateProduct", label: <Link to="/products/create">Sell</Link> },
+                                {key: "menuTransactions", label: <Link to="/transactions/own">Transactions</Link> },
                                 {key: "menuDisconnect", label: <Link to="#" onClick={disconnect}>Disconnect</Link>},
                             ]}>
                             </Menu>
@@ -173,6 +175,9 @@ let App = () => {
                         }></Route>
                         <Route path="/transactions/own" element={
                             <ListMyTransactionsComponent />
+                        }></Route>
+                        <Route path="/profile/:userId" element={
+                            <UserProfile />
                         }></Route>
                     </Routes>
                 </div>

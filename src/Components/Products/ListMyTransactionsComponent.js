@@ -9,7 +9,7 @@ let ListMyTransactionsComponent = () => {
         getMyTransactions();
     }, []);
 
-    // Nueva función para obtener el título del producto basado en productId
+    // Función para obtener el título del producto basado en productId
     let getProductTitle = async (productId) => {
         let response = await fetch(
             process.env.REACT_APP_BACKEND_BASE_URL + "/products/" + productId,
@@ -23,7 +23,7 @@ let ListMyTransactionsComponent = () => {
 
         if (response.ok) {
             let jsonData = await response.json();
-            return jsonData.title; // Obtiene el título del producto
+            return jsonData.title;
         } else {
             console.error("Error fetching product title");
             return null;
@@ -44,14 +44,14 @@ let ListMyTransactionsComponent = () => {
         if (response.ok) {
             let jsonData = await response.json();
 
-            // Mapear las transacciones con los títulos de los productos
-            let transactionsWithProductTitles = await Promise.all(jsonData.map(async (transaction) => {
+            // Mapear las transacciones con los títulos de productos
+            let transactionsWithDetails = await Promise.all(jsonData.map(async (transaction) => {
                 transaction.key = transaction.id;
-                transaction.productTitle = await getProductTitle(transaction.productId); // Obtener y asignar el título del producto
+                transaction.productTitle = await getProductTitle(transaction.productId); // Obtener título del producto
                 return transaction;
             }));
-
-            setTransactions(transactionsWithProductTitles);
+            console.log(transactionsWithDetails);
+            setTransactions(transactionsWithDetails);
         } else {
             let responseBody = await response.json();
             let serverErrors = responseBody.errors;
@@ -68,11 +68,15 @@ let ListMyTransactionsComponent = () => {
         },
         {
             title: "Buyer ID",
-            dataIndex: "buyerId"
+            dataIndex: "buyerId", // ID del comprador
+        },
+        {
+            title: "Seller ID",
+            dataIndex: "sellerId", // ID del vendedor
         },
         {
             title: "Product Title",
-            dataIndex: "productTitle" // Columna para el título del producto
+            dataIndex: "productTitle" // Título del producto
         },
         {
             title: "Product Price (€)",

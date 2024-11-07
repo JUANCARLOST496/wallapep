@@ -1,9 +1,62 @@
 import { Row, Col, Carousel, Card } from "antd";
 import Meta from "antd/es/card/Meta";
+import {useEffect, useState} from "react";
 
 
 let MainPage = () => {
 
+
+
+    const [randomElectronicsImage, setRandomElectronicsImage] = useState("");
+
+    useEffect(() => {
+        getRandomElectronicsImage(); // Llama a la función para obtener una imagen aleatoria
+    }, []);
+
+    const getRandomElectronicsImage = async () => {
+        // Obtén todos los productos de la categoría "Electronics"
+        const response = await fetch(
+            `${process.env.REACT_APP_BACKEND_BASE_URL}/products?category=Electronics`, // Suponiendo que la API permite filtrar por categoría
+            {
+                method: "GET",
+                headers: {
+                    "apikey": localStorage.getItem("apiKey")
+                },
+            }
+        );
+
+        if (response.ok) {
+            const products = await response.json();
+
+            // Selecciona un producto aleatorio de la lista de productos de "Electronics"
+            if (products.length > 0) {
+                const randomProduct = products[Math.floor(Math.random() * products.length)];
+
+                // Construye la URL de la imagen usando el ID del producto aleatorio
+                const urlImage = `${process.env.REACT_APP_BACKEND_BASE_URL}/images/${randomProduct.id}.png`;
+                const existsImage = await checkURL(urlImage);
+
+                // Establece la URL de la imagen si existe, o usa una imagen de reserva
+                setRandomElectronicsImage(existsImage ? urlImage : "/laptop.png");
+            }
+        } else {
+            const responseBody = await response.json();
+            const serverErrors = responseBody.errors;
+            serverErrors.forEach(e => {
+                console.log("Error: " + e.msg);
+            });
+        }
+    };
+
+
+    const checkURL = async (url) => {
+        try {
+            const response = await fetch(url);
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
+    };
 
     let contentStyle = {
         height: '300px',
@@ -63,7 +116,7 @@ let MainPage = () => {
                             <div style={{ height: 200, overflow: 'hidden' }}>
                                 <img
                                     alt="example"
-                                    src="/laptop.png"
+                                    src={randomElectronicsImage}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             </div>
