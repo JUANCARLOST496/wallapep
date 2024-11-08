@@ -8,7 +8,15 @@ import ListMyProductsComponent from "./Components/Products/ListMyProductsCompone
 import ListMyTransactionsComponent from "./Components/Products/ListMyTransactionsComponent";
 import {Route, Routes, Link, useNavigate, useLocation } from "react-router-dom"
 import {Layout, Menu, Avatar, Typography, Col, Row, notification } from 'antd';
-import {FireOutlined, LoginOutlined} from '@ant-design/icons';
+import {
+    AreaChartOutlined,
+    CreditCardOutlined,
+    FireOutlined,
+    LoginOutlined,
+    LogoutOutlined,
+    ShoppingCartOutlined,
+    ShoppingOutlined
+} from '@ant-design/icons';
 import {useEffect, useState} from "react";
 import MainPage from "./main";
 import UserProfile from "./Components/User/UserProfile";
@@ -155,11 +163,11 @@ let App = () => {
                                      Main
                                 </Link>
                                 )},
-                                {key: "menuProducts", label: <Link to="/products">Products</Link>},
-                                {key: "menuMyProduct", label: <Link to="/products/own">My Products</Link> },
-                                {key: "menuCreateProduct", label: <Link to="/products/create">Sell</Link> },
-                                {key: "menuTransactions", label: <Link to="/transactions/own">Transactions</Link> },
-                                {key: "menuDisconnect", label: <Link to="#" onClick={disconnect}>Disconnect</Link>},
+                                {key: "menuProducts", icon: <ShoppingOutlined style={{ fontSize: '20px' }}/> , label: <Link to="/products">Products for Sale</Link>},
+                                {key: "menuMyProduct",icon: <ShoppingCartOutlined style={{ fontSize: '20px' }}/>, label: <Link to="/products/own">My Products for Sale</Link> },
+                                {key: "menuCreateProduct",icon: <FireOutlined style={{ fontSize: '20px' }}/> , label: <Link to="/products/create">Upload Product</Link> },
+                                {key: "menuTransactions",  icon: <CreditCardOutlined  style={{ fontSize: '20px' }}/> ,label:<Link to="/transactions/own">My Transactions</Link> },
+                                {key: "menuDisconnect", icon: <LogoutOutlined  style={{ fontSize: '20px' }}/>, label: <Link to="#" onClick={disconnect}>Disconnect</Link>},
                             ]}>
                             </Menu>
                         }

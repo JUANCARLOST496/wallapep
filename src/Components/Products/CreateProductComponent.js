@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { modifyStateProperty } from "../../Utils/UtilsState";
-import { Card, Input, Button, Row, Col, Form, Typography, Upload, Select, Grid, message } from "antd";
+import { Card, Input, Button, Row, Col, Form, Upload, Select, Grid, message } from "antd";
 import { useSelector, useDispatch } from "react-redux";
-import { actions } from "../../Reducers/reducerCountSlice";
-import { useNavigate } from "react-router-dom"; // Importa useNavigate para la redirección
+import { useNavigate } from "react-router-dom";
+
 const { Option } = Select;
 const { useBreakpoint } = Grid;
 
@@ -12,7 +12,7 @@ let CreateProductComponent = () => {
     const countGlobalState1 = useSelector(state => state.reducerCount);
     const countGlobalState2 = useSelector(state => state.reducerCountSlice);
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // Inicializa useNavigate para redirección
+    const navigate = useNavigate();
 
     let [formData, setFormData] = useState({});
     let [selectedCategory, setSelectedCategory] = useState(null);
@@ -29,7 +29,7 @@ let CreateProductComponent = () => {
 
     const [form] = Form.useForm();
 
-    const isFormComplete = formData.title && formData.description && formData.price && formData.category && formData.image;
+    const isFormComplete = formData.title && formData.description && formData.price > 0 && formData.category && formData.image;
 
     let clickCreateProduct = async () => {
         let response = await fetch(
@@ -45,8 +45,8 @@ let CreateProductComponent = () => {
         if (response.ok) {
             let data = await response.json();
             await uploadImage(data.productId);
-            message.success('Added Product'); // Muestra mensaje de éxito
-            navigate('/products'); // Redirige a /listproducts
+            message.success('Added Product');
+            navigate('/products');
         } else {
             let responseBody = await response.json();
             let serverErrors = responseBody.errors;
@@ -103,11 +103,26 @@ let CreateProductComponent = () => {
                             />
                         </Form.Item>
 
-                        <Form.Item label="Price" required>
+                        <Form.Item
+                            label="Price"
+                            required
+                            rules={[
+                                {
+                                    validator: (_, value) =>
+                                        value > 0 ? Promise.resolve() : Promise.reject("Negative number"),
+                                },
+                            ]}
+                            validateStatus={formData.price <= 0 ? "error" : ""}
+                            help={formData.price <= 0 ? "Negative number" : ""}
+                        >
                             <Input
-                                onChange={(i) => modifyStateProperty(formData, setFormData, "price", i.currentTarget.value)}
+                                onChange={(i) => {
+                                    const value = i.currentTarget.value;
+                                    modifyStateProperty(formData, setFormData, "price", value >= 0 ? value : "");
+                                }}
                                 size="large"
                                 type="number"
+                                min={0}
                                 placeholder="Price"
                             />
                         </Form.Item>
@@ -140,7 +155,7 @@ let CreateProductComponent = () => {
                             type="primary"
                             block
                             onClick={clickCreateProduct}
-                            disabled={!isFormComplete} // Desactivado hasta que todos los campos estén completos
+                            disabled={!isFormComplete} // Desactivado hasta que todos los campos estén completos y price > 0
                         >
                             Sell Product
                         </Button>
@@ -152,3 +167,4 @@ let CreateProductComponent = () => {
 }
 
 export default CreateProductComponent;
+

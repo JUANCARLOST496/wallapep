@@ -241,6 +241,7 @@ let CreateUserComponent = () => {
                                                 <DatePicker
                                                     style={{ width: '100%', padding: "8px", borderRadius: "4px", fontSize: "14px" }}
                                                     onChange={(date) => handleFieldChange("birthday", date)}
+                                                    disabledDate={(current) => current && current > new Date()}
                                                 />
                                             </Form.Item>
                                         </Col>
