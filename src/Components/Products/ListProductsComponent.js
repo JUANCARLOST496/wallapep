@@ -120,7 +120,7 @@ let ListProductsComponent = () => {
                     placement: 'topRight',
                     duration: 3
                 });
-                // Redirigir a la página principal después de un minuto, si quieres, o solo mostrar el mensaje
+
             }
         } else {
             const responseBody = await response.json();
@@ -141,12 +141,8 @@ let ListProductsComponent = () => {
         <div>
             <h2>Products</h2>
 
-            <div style={{ marginBottom: 20 }}>
-                <strong>{filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found</strong>
-            </div>
-
+            {/* Filtros */}
             <Row gutter={[16, 16]} style={{ marginBottom: '20px' }}>
-                {/* Campo de búsqueda */}
                 <Col xs={24} sm={12} md={8} lg={6}>
                     <Input
                         placeholder="Search products..."
@@ -155,7 +151,6 @@ let ListProductsComponent = () => {
                     />
                 </Col>
 
-                {/* Selección de categoría */}
                 <Col xs={24} sm={12} md={8} lg={6}>
                     <Select
                         placeholder="Select Category"
@@ -173,7 +168,6 @@ let ListProductsComponent = () => {
                         ))}
                     </Select>
                 </Col>
-
 
                 <Col xs={24} sm={12} md={8} lg={6}>
                     <Row gutter={10}>
@@ -194,7 +188,6 @@ let ListProductsComponent = () => {
                     </Row>
                 </Col>
 
-                {/* Ordenar por precio */}
                 <Col xs={24} sm={12} md={6} lg={4}>
                     <Select
                         placeholder="Order by Price"
@@ -207,48 +200,49 @@ let ListProductsComponent = () => {
                 </Col>
             </Row>
 
-
-
-
-
-
-
-
-
+            {/* Productos */}
             <Row gutter={[16, 16]}>
                 {filteredProducts.map(p => (
                     <Col
                         key={p.id}
-                        xs={24} sm={12} md={8} lg={6} xl={5}
-                        style={{ margin: "8px" }}
+                        xs={24} sm={12} md={8} lg={5}
+                        style={{ margin: "8px" }} // Margen sutil alrededor de cada tarjeta
                     >
-
-                        <Card
-                            title={p.title}
-                            cover={<img src={p.image} alt={p.title} style={{ padding: '10px', maxHeight: '400px', objectFit: 'contain' }} />}
-                            style={{ width: "100%", minHeight: "250px", borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}
-                        >
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333', marginBottom: '10px' }}>${p.price}</div>
-                                {/* Botón de compra */}
-                                <Button
-                                    type="primary"
-                                    onClick={(e) => buyProduct(p.id, e)} // Manejar compra
-                                    icon={<ShoppingOutlined />}
-                                    size="large"
-                                    style={{
-                                        marginTop: '10px',
-                                        width: '150px',
-                                        textAlign: 'center',
-                                        backgroundColor: '#52c41a',
-                                        borderColor: '#52c41a',
-                                        borderRadius: '4px'
-                                    }}
-                                >
-                                    Buy Now
-                                </Button>
-                            </div>
-                        </Card>
+                        {/* Enlace a la página de detalles */}
+                        <Link to={`/products/${p.id}`}>
+                            <Card
+                                title={p.title}
+                                cover={<img src={p.image} alt={p.title} style={{ padding: '10px', maxHeight: '500px', objectFit: 'contain' }} />}
+                                style={{
+                                    width: "100%",
+                                    minHeight: "250px",
+                                    borderRadius: '8px',
+                                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                    cursor: 'pointer' // Se agrega cursor de tipo "puntero" para que parezca un enlace
+                                }}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333', marginBottom: '10px' }}>${p.price}</div>
+                                    {/* Botón de compra */}
+                                    <Button
+                                        type="primary"
+                                        onClick={(e) => buyProduct(p.id, e)} // Prevent the redirection for Buy button
+                                        icon={<ShoppingOutlined />}
+                                        size="large"
+                                        style={{
+                                            marginTop: '10px',
+                                            width: '150px',
+                                            textAlign: 'center',
+                                            backgroundColor: '#52c41a',
+                                            borderColor: '#52c41a',
+                                            borderRadius: '4px'
+                                        }}
+                                    >
+                                        Buy Now
+                                    </Button>
+                                </div>
+                            </Card>
+                        </Link>
                     </Col>
                 ))}
             </Row>
