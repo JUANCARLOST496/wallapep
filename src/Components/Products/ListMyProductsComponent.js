@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Table, Space, Typography } from 'antd';
+import { Table, Space, Typography, Row, Col, Card, Statistic } from 'antd';
 import { Link } from "react-router-dom";
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { timestampToString } from "../../Utils/UtilsDates";
 
 const ListMyProductsComponent = () => {
@@ -63,74 +64,153 @@ const ListMyProductsComponent = () => {
         }
     };
 
+    // Cálculo de estadísticas
+    const getTotalPrice = () => {
+        return products.reduce((acc, product) => acc + (product.price || 0), 0);
+    };
+
+    const getSoldProductsCount = () => {
+        return products.filter(p => p.buyerId).length;
+    };
+
+    const getTotalEarnings = () => {
+        return products
+            .filter(p => p.buyerId)
+            .reduce((acc, product) => acc + (product.price || 0), 0);
+    };
+
     const columns = [
         {
-            title: "Id",
-            dataIndex: "id",
-            responsive: ['md'],
-            render: (text) => <Text style={{ fontSize: '12px' }}>{text}</Text>,
-        },
-        {
-            title: "Seller Id",
-            dataIndex: "sellerId",
-            responsive: ['lg'],
-            render: (text) => <Text style={{ fontSize: '12px' }}>{text}</Text>,
-        },
-        {
-            title: "Title",
+            title: <div style={{ textAlign: 'center' }}>Title</div>,
             dataIndex: "title",
             ellipsis: true,
             responsive: ['sm'],
-            render: (text) => <Text style={{ fontSize: '12px', fontWeight: '500' }}>{text}</Text>,
+            render: (text) => <Text style={{ fontSize: '16px', fontWeight: '500', paddingLeft: '8px', paddingRight: '8px' }}>{text}</Text>,
+            sorter: (a, b) => a.title.localeCompare(b.title),
         },
         {
-            title: "Description",
+            title: <div style={{ textAlign: 'center' }}>Description</div>,
             dataIndex: "description",
             ellipsis: true,
             responsive: ['md'],
-            render: (text) => <Text style={{ fontSize: '11px' }}>{text}</Text>,
+            render: (text) => <Text style={{ fontSize: '15px', paddingLeft: '12px', paddingRight: '12px' }}>{text}</Text>,
         },
         {
-            title: "Price (€)",
+            title: <div style={{ textAlign: 'center' }}>Price (€)</div>,
             dataIndex: "price",
             responsive: ['sm'],
-            render: (price) => <Text strong style={{ fontSize: '12px' }}>{price}</Text>,
+            align: 'right',
+            render: (price) => <Text strong style={{ fontSize: '16px' }}>{price}</Text>,
+            sorter: (a, b) => a.price - b.price,
         },
         {
-            title: "Date",
+            title: <div style={{ textAlign: 'center' }}>Date</div>,
             dataIndex: "date",
+            align: 'right',
             responsive: ['md'],
-            render: (date) => <Text style={{ fontSize: '11px' }}>{timestampToString(date)}</Text>,
+            render: (date) => <Text style={{ fontSize: '15px', paddingLeft: '12px', paddingRight: '12px' }}>{timestampToString(date)}</Text>,
+            sorter: (a, b) => new Date(a.date) - new Date(b.date),
         },
         {
-            title: "Buyer",
+            title: <div style={{ textAlign: 'center' }}>Estado de Venta</div>,
+            dataIndex: "buyerId",
+            key: "estadoVenta",
+            filters: [
+                { text: 'Vendido', value: true },
+                { text: 'No Vendido', value: false },
+            ],
+            onFilter: (value, record) => Boolean(record.buyerId) === value,
+            render: (buyerId) =>
+                buyerId ? (
+                    <Text strong style={{ color: 'green' }}>Vendido</Text>
+                ) : (
+                    <Text strong style={{ color: 'red' }}>No Vendido</Text>
+                ),
+            align: 'center',
+        },
+        {
+            title: <div style={{ textAlign: 'center' }}>Buyer</div>,
             dataIndex: [],
             responsive: ['sm'],
             render: (product) =>
-                <Link to={`/user/${product.buyerId}`} style={{ fontSize: '11px' }}>{product.buyerEmail}</Link>
+                product.buyerId ? (
+                    <Link to={`/user/${product.buyerId}`} style={{ fontSize: '15px', paddingLeft: '12px', paddingRight: '12px' }}>{product.buyerEmail}</Link>
+                ) : (
+                    <Text>-</Text>
+                ),
         },
         {
-            title: "Actions",
+            title: <div style={{ textAlign: 'center' }}>Actions</div>,
             dataIndex: "id",
             render: (id) =>
-                <Space direction="vertical" size="small">
-                    <Link to={`/products/edit/${id}`} style={{ fontSize: '11px' }}>Edit</Link>
-                    <Link to="#" onClick={() => deleteProduct(id)} style={{ fontSize: '11px' }}>Delete</Link>
-                </Space>
+                <Space size="middle">
+                    <Link to={`/products/edit/${id}`} style={{ fontSize: '16px' }}>
+                        <EditOutlined /> Edit
+                    </Link>
+                    <a onClick={() => deleteProduct(id)} style={{ fontSize: '16px', color: 'red' }}>
+                        <DeleteOutlined /> Delete
+                    </a>
+                </Space>,
         },
     ];
+    
 
     return (
-        <Table
-            columns={columns}
-            dataSource={products}
-            pagination={{ pageSize: 5 }}
-            scroll={{ x: 'max-content' }}
-            size="small"
-            style={{ fontSize: '12px' }}
-            rowClassName={() => 'custom-row'}
-        />
+        <div>
+
+            {/* Estadísticas */}
+            <Row gutter={16} style={{ marginBottom: '20px' }}>
+                <Col span={8}>
+                    <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
+                        <Statistic
+                            title="Productos Listados"
+                            value={products.length}
+                            valueStyle={{ color: '#cf1322', fontWeight: 'bold' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={8}>
+                    <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
+                        <Statistic
+                            title="Productos Vendidos"
+                            value={getSoldProductsCount()}
+                            valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={8}>
+                    <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
+                        <Statistic
+                            title="Ganancias Obtenidas"
+                            value={getTotalEarnings().toFixed(2)}
+                            prefix="€"  
+                            valueStyle={{ color: '#3f8600', fontWeight: 'bold' }}
+                        />
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Tabla de productos */}
+            <Table
+                columns={columns}
+                dataSource={products}
+                pagination={{ pageSize: 15 }}
+                scroll={{ x: 'max-content' }}
+                size="small"
+                bordered={true}
+                style={{ fontSize: '14px' }}
+                rowClassName={() => 'custom-row'}
+            />
+        </div>
     );
 };
 
 export default ListMyProductsComponent;
+
+
+
+
+
+
+
+

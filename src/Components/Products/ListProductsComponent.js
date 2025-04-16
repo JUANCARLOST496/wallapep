@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Card, Col, Row, Select, Input, InputNumber, notification, Button } from 'antd';
+import { Card, Col, Row, Select, Input, InputNumber, notification, Button, Typography } from 'antd';
 import { ShoppingOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
+const { Text } = Typography;
 
 let ListProductsComponent = () => {
     let [products, setProducts] = useState([]);
@@ -96,8 +97,11 @@ let ListProductsComponent = () => {
     };
 
     const buyProduct = async (productId, event) => {
-        event.preventDefault(); // Evitar que se realice cualquier redirección al hacer clic en "Buy"
-
+        console.log("Buy button clicked for product:", productId);
+    
+        event.preventDefault();
+        console.log("preventDefault called.");
+    
         const response = await fetch(
             `${process.env.REACT_APP_BACKEND_BASE_URL}/transactions/`,
             {
@@ -109,9 +113,10 @@ let ListProductsComponent = () => {
                 body: JSON.stringify({ productId })
             }
         );
-
+    
         if (response.ok) {
             const jsonData = await response.json();
+            console.log("Transaction response:", jsonData);
             if (jsonData.affectedRows === 1) {
                 console.log("Producto comprado exitosamente");
                 notification.success({
@@ -120,7 +125,6 @@ let ListProductsComponent = () => {
                     placement: 'topRight',
                     duration: 3
                 });
-
             }
         } else {
             const responseBody = await response.json();
@@ -129,13 +133,15 @@ let ListProductsComponent = () => {
                 console.log("Error: " + e.msg);
                 notification.error({
                     message: 'Error de Compra',
-                    description: e.msg, // El mensaje de error retornado por el backend
+                    description: e.msg,
                     placement: 'topRight',
                     duration: 3
                 });
             });
         }
     };
+    
+    
 
     return (
         <div>
@@ -194,9 +200,14 @@ let ListProductsComponent = () => {
                         onChange={value => setPriceOrder(value)}
                         style={{ width: '100%' }}
                     >
+                        <Option value="">None</Option>
                         <Option value="asc">Price: Low to High</Option>
                         <Option value="desc">Price: High to Low</Option>
                     </Select>
+                    {/* Mostrar el número de productos filtrados */}
+                    <Text type="secondary" style={{ display: 'block', marginTop: '10px' }}>
+                        {filteredProducts.length} products found
+                    </Text>
                 </Col>
             </Row>
 
@@ -225,21 +236,30 @@ let ListProductsComponent = () => {
                                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333', marginBottom: '10px' }}>${p.price}</div>
                                     {/* Botón de compra */}
                                     <Button
-                                        type="primary"
-                                        onClick={(e) => buyProduct(p.id, e)} // Prevent the redirection for Buy button
-                                        icon={<ShoppingOutlined />}
-                                        size="large"
-                                        style={{
-                                            marginTop: '10px',
-                                            width: '150px',
-                                            textAlign: 'center',
-                                            backgroundColor: '#52c41a',
-                                            borderColor: '#52c41a',
-                                            borderRadius: '4px'
-                                        }}
-                                    >
-                                        Buy Now
-                                    </Button>
+    type="primary"
+    onClick={(e) => buyProduct(p.id, e)}
+    icon={<ShoppingOutlined />}
+    size="large"
+    disabled={(() => {
+        const userId = localStorage.getItem("userId");
+        console.log("Producto OwnerId:", p.ownerId); // Log del ID del propietario del producto
+        console.log("UserId desde localStorage:", userId); // Log del ID del usuario actual
+        const isDisabled = p.ownerId === userId;
+        console.log("¿Botón deshabilitado?", isDisabled); // Log para saber si está deshabilitado
+        return isDisabled;
+    })()}
+    style={{
+        marginTop: '10px',
+        width: '150px',
+        textAlign: 'center',
+        backgroundColor: '#52c41a',
+        borderColor: '#52c41a',
+        borderRadius: '4px'
+    }}
+>
+    Buy Now
+</Button>
+
                                 </div>
                             </Card>
                         </Link>

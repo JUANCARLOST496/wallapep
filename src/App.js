@@ -15,7 +15,8 @@ import {
     LoginOutlined,
     LogoutOutlined,
     ShoppingCartOutlined,
-    ShoppingOutlined
+    ShoppingOutlined,
+    FormOutlined
 } from '@ant-design/icons';
 import {useEffect, useState} from "react";
 import MainPage from "./main";
@@ -145,11 +146,11 @@ let App = () => {
                                     label: (
                                         <Link to="/">
                                             <img src="/logo.png" width="40" height="40" alt="Logo" style={{ marginRight: '20px' }}/>
-                                            Main
+
                                         </Link>
                                     )},
                                 {key: "menuLogin", icon: <LoginOutlined/>, label: <Link to="/login">Login</Link>},
-                                {key: "menuRegister", label: <Link to="/register">Register</Link>},
+                                {key: "menuRegister", icon:<FormOutlined />,label: <Link to="/register">Register</Link>},
                             ]}>
                             </Menu>
                         }
@@ -160,7 +161,6 @@ let App = () => {
                                     label: (
                                 <Link to="/">
                                 <img src="/logo.png" width="40" height="40" alt="Logo" style={{ marginRight: '20px' }}/>
-                                     Main
                                 </Link>
                                 )},
                                 {key: "menuProducts", icon: <ShoppingOutlined style={{ fontSize: '20px' }}/> , label: <Link to="/products">Products for Sale</Link>},
@@ -172,6 +172,7 @@ let App = () => {
                             </Menu>
                         }
                     </Col>
+
                     <Col xs= {6} sm={5} md = {4}  lg = {3} xl = {2}
                          style={{display: 'flex', flexDirection: 'row-reverse' }} >
                         { login ? (
@@ -181,9 +182,10 @@ let App = () => {
                                 </Avatar>
                             </Link>
                         ) : (
-                            <Link to="/login"> <Text style={{ color:"#ffffff" }}>Login</Text></Link>
+                            <Link to="/login"> <Text style={{ color:"#ffffff" }}></Text></Link>
                         )}
                     </Col>
+
                 </Row>
             </Header>
             <Content style={{padding: "20px 50px"}}>
@@ -216,7 +218,7 @@ let App = () => {
                         <Route path="/transactions/own" element={
                             <ListMyTransactionsComponent />
                         }></Route>
-                        <Route path="/profile/:userId" element={
+                        <Route path="/profile/:id" element={
                             <UserProfile />
                         }></Route>
                     </Routes>

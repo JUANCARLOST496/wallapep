@@ -1,98 +1,173 @@
 import { useState, useEffect } from "react";
-import { Table } from 'antd';
+import { Table, Space, Typography, Row, Col, Card, Statistic } from 'antd';
 import { timestampToString } from "../../Utils/UtilsDates";
 
-let ListMyTransactionsComponent = () => {
-    let [transactions, setTransactions] = useState([]);
+const ListMyProductsComponent = () => {
+    const [products, setProducts] = useState([]);
+    const { Text } = Typography;
+    const currentUserId = localStorage.getItem("userId"); // <-- Aquí obtenemos el userId desde el localStorage
 
     useEffect(() => {
-        getMyTransactions();
+        getMyProducts();
     }, []);
 
-    // Función para obtener el título del producto basado en productId
-    let getProductTitle = async (productId) => {
-        let response = await fetch(
-            process.env.REACT_APP_BACKEND_BASE_URL + "/products/" + productId,
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                },
-            }
-        );
 
+    const getMyProducts = async () => {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/transactions/own/`, {
+            method: "GET",
+            headers: {
+                "apikey": localStorage.getItem("apiKey")
+            },
+        });
+
+    
         if (response.ok) {
-            let jsonData = await response.json();
-            return jsonData.title;
+            const jsonData = await response.json();
+            jsonData.forEach(product => {
+                product.key = product.id;
+            });
+            setProducts(jsonData);
+            console.log("Productos recibidos:");
+            console.table(jsonData);
         } else {
-            console.error("Error fetching product title");
-            return null;
-        }
-    };
-
-    let getMyTransactions = async () => {
-        let response = await fetch(
-            process.env.REACT_APP_BACKEND_BASE_URL + "/transactions/own/",
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                },
-            }
-        );
-
-        if (response.ok) {
-            let jsonData = await response.json();
-
-            // Mapear las transacciones con los títulos de productos
-            let transactionsWithDetails = await Promise.all(jsonData.map(async (transaction) => {
-                transaction.key = transaction.id;
-                transaction.productTitle = await getProductTitle(transaction.productId); // Obtener título del producto
-                console.log("Seller ID:", transaction.sellerId);
-                return transaction;
-            }));
-            console.log(transactionsWithDetails);
-            setTransactions(transactionsWithDetails);
-        } else {
-            let responseBody = await response.json();
-            let serverErrors = responseBody.errors;
+            const responseBody = await response.json();
+            const serverErrors = responseBody.errors;
             serverErrors.forEach(e => {
                 console.log("Error: " + e.msg);
             });
         }
     };
 
-    let columns = [
+    const columns = [
         {
-            title: "Transaction ID",
-            dataIndex: "id",
+            title: <div style={{ textAlign: 'center' }}>Title</div>,
+            dataIndex: "title",
+            ellipsis: true,
+            responsive: ['sm'],
+            render: (text) => <Text style={{ fontSize: '16px', fontWeight: '500', paddingLeft: '8px', paddingRight: '8px' }}>{text}</Text>,
+            sorter: (a, b) => a.title.localeCompare(b.title),
         },
         {
-            title: "Buyer ID",
-            dataIndex: "buyerId", // ID del comprador
+            title: <div style={{ textAlign: 'center' }}>Description</div>,
+            dataIndex: "description",
+            ellipsis: true,
+            responsive: ['md'],
+            render: (text) => <Text style={{ fontSize: '15px', paddingLeft: '12px', paddingRight: '12px' }}>{text}</Text>,
         },
         {
-            title: "Seller ID",
-            dataIndex: "sellerId", // ID del vendedor
+            title: <div style={{ textAlign: 'center' }}>Price (€)</div>,
+            dataIndex: "price",
+            responsive: ['sm'],
+            align: 'right',
+            render: (price) => <Text strong style={{ fontSize: '16px' }}>{price}</Text>,
+            sorter: (a, b) => a.price - b.price,
         },
         {
-            title: "Product Title",
-            dataIndex: "productTitle" // Título del producto
-        },
-        {
-            title: "Product Price (€)",
-            dataIndex: "productPrice",
-        },
-        {
-            title: "Date",
+            title: <div style={{ textAlign: 'center' }}>Date</div>,
             dataIndex: "date",
-            render: (date) => timestampToString(date)
+            align: 'right',
+            responsive: ['md'],
+            render: (date) => <Text style={{ fontSize: '15px', paddingLeft: '12px', paddingRight: '12px' }}>{timestampToString(date)}</Text>,
+            sorter: (a, b) => new Date(a.date) - new Date(b.date),
+        },
+        {
+            title: <div style={{ textAlign: 'center' }}>Estado</div>,
+            key: "estadoVenta",
+            filters: [
+                { text: 'Compra', value: 'Compra' },
+                { text: 'Venta', value: 'Venta' },
+            ],
+            onFilter: (value, record) => {
+                if (value === 'Compra') return record.buyerId === currentUserId;
+                if (value === 'Venta') return record.sellerId === currentUserId && record.buyerId;
+                return true;
+            },
+            render: (_, record) => {
+                const buyerId = parseInt(record.buyerId);
+                const sellerId = parseInt(record.sellerId);
+                
+                // Agregamos más console.log para ver las evaluaciones de las condiciones
+                console.log("buyerId:", buyerId, "sellerId:", sellerId, "currentUserId:", currentUserId);
+            
+                if (buyerId == currentUserId) {
+                    console.log("Compra: El buyerId coincide con el currentUserId");
+                    return <Text strong style={{ color: 'red' }}>Compra</Text>;
+                } else if (sellerId == currentUserId && buyerId) {
+                    console.log("Venta: El sellerId coincide con el currentUserId y hay un buyerId");
+                    return <Text strong style={{ color: 'green' }}>Venta</Text>;
+                } else {
+                    console.log("Estado no encontrado");
+                    return <Text type="secondary">—</Text>;
+                }
+            },
+            
+            align: 'center',
         }
     ];
 
     return (
-        <Table columns={columns} dataSource={transactions}></Table>
+        <div>
+            {/* Estadísticas */}
+            <Row gutter={16} style={{ marginBottom: '20px' }}>
+                <Col span={6}>
+                    <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
+                        <Statistic
+                            title="N.º de Compras"
+                            value={products.filter(p => p.buyerId === currentUserId).length}
+                            valueStyle={{ color: '#cf1322', fontWeight: 'bold' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={6}>
+                    <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
+                        <Statistic
+                            title="Total Compras"
+                            value={products
+                                .filter(p => p.buyerId === currentUserId)
+                                .reduce((acc, product) => acc + (product.price || 0), 0)
+                                .toFixed(2)}
+                            prefix="€"
+                            valueStyle={{ color: '#cf1322', fontWeight: 'bold' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={6}>
+                    <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
+                        <Statistic
+                            title="N.º de Ventas"
+                            value={products.filter(p => p.sellerId === currentUserId && p.buyerId).length}
+                            valueStyle={{ color: '#3f8600', fontWeight: 'bold' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={6}>
+                    <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
+                        <Statistic
+                            title="Total Ventas"
+                            value={products
+                                .filter(p => p.sellerId === currentUserId && p.buyerId)
+                                .reduce((acc, product) => acc + (product.price || 0), 0)
+                                .toFixed(2)}
+                            prefix="€"
+                            valueStyle={{ color: '#3f8600', fontWeight: 'bold' }}
+                        />
+                    </Card>
+                </Col>
+            </Row>
+
+            {/* Tabla de productos */}
+            <Table
+                columns={columns}
+                dataSource={products}
+                pagination={{ pageSize: 15 }}
+                scroll={{ x: 'max-content' }}
+                size="small"
+                bordered={true}
+                style={{ fontSize: '14px' }}
+                rowClassName={() => 'custom-row'}
+            />
+        </div>
     );
 };
 
-export default ListMyTransactionsComponent;
+export default ListMyProductsComponent;

@@ -33,6 +33,7 @@ let LoginFormComponent = (props) => {
             if (responseBody.apiKey && responseBody.email) {
                 localStorage.setItem("apiKey", responseBody.apiKey)
                 localStorage.setItem("email", responseBody.email)
+                localStorage.setItem("userId", responseBody.id)
             }
             console.log("ok " + responseBody)
             setLogin(true)

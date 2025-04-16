@@ -1,111 +1,166 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import {Card, List, Typography} from "antd";
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom'; // ✅ Importa useParams
+import { Card, Typography, List, Divider } from 'antd';
 
-let UserProfileComponent = () => {
-    const { userId } = useParams(); // Para obtener el ID del usuario desde la URL
-    const [userData, setUserData] = useState(null);
-    const [userTransactions, setUserTransactions] = useState([]);
-    const [userProducts, setUserProducts] = useState([]);
+const { Title, Paragraph } = Typography;
 
-    useEffect(() => {
-        fetchUserProfile();
-        fetchUserTransactions();
-        fetchUserProducts();
-    }, []);
+const UserTransactionsComponent = () => {
+  const { id } = useParams(); // ✅ Extrae el id de la URL
+  const [user, setUser] = useState(null);
+  const [apiKey, setApiKey] = useState(null);
+  const [sellerTransactions, setSellerTransactions] = useState([]);
+  const [buyerTransactions, setBuyerTransactions] = useState([]);
+  const [soldProducts, setSoldProducts] = useState([]);
 
-    const fetchUserProfile = async () => {
-        let response = await fetch(
-            `${process.env.REACT_APP_BACKEND_BASE_URL}/users/${userId}`,
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                },
-            }
-        );
-        if (response.ok) {
-            let jsonData = await response.json();
-            setUserData(jsonData);
-        }
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem('apiKey');
+    if (storedApiKey) setApiKey(storedApiKey);
+  }, []);
+
+  useEffect(() => {
+    if (!id || !apiKey) return;
+
+    const headers = {
+      'Content-Type': 'application/json',
+      'apiKey': apiKey.trim(),
     };
 
-    const fetchUserTransactions = async () => {
-        let response = await fetch(
-            `${process.env.REACT_APP_BACKEND_BASE_URL}/transactions/public?sellerId=${userId}`,
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                },
-            }
-        );
-        if (response.ok) {
-            let jsonData = await response.json();
-            setUserTransactions(jsonData);
-        }
-    };
+    // Datos de usuario
+    fetch(`http://localhost:4000/users/${id}`, { headers })
+      .then(res => res.json())
+      .then(data => setUser(data))
+      .catch(err => console.error("Error al obtener el usuario:", err));
 
-    const fetchUserProducts = async () => {
-        let response = await fetch(
-            `${process.env.REACT_APP_BACKEND_BASE_URL}/products?sellerId=${userId}`,
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                },
-            }
-        );
-        if (response.ok) {
-            let jsonData = await response.json();
-            setUserProducts(jsonData);
-        }
-    };
+    // Transacciones como vendedor
+    fetch(`http://localhost:4000/transactions/public?sellerId=${id}`, { headers })
+      .then(res => res.json())
+      .then(async (data) => {
+        const txs = await Promise.all(data.map(async (tx) => {
+          try {
+            const res = await fetch(`http://localhost:4000/products/${tx.productId}`, { headers });
+            const product = await res.json();
+            return { ...tx, product };
+          } catch (err) {
+            console.error("Error producto vendedor:", err);
+            return { ...tx, product: null };
+          }
+        }));
+        setSellerTransactions(txs);
+      })
+      .catch(err => console.error("Error transacciones vendedor:", err));
 
-    if (!userData) {
-        return <div>Loading...</div>;
-    }
+    // Transacciones como comprador
+    fetch(`http://localhost:4000/transactions/public?buyerId=${id}`, { headers })
+      .then(res => res.json())
+      .then(async (data) => {
+        const txs = await Promise.all(data.map(async (tx) => {
+          try {
+            const res = await fetch(`http://localhost:4000/products/${tx.productId}`, { headers });
+            const product = await res.json();
+            return { ...tx, product };
+          } catch (err) {
+            console.error("Error producto comprador:", err);
+            return { ...tx, product: null };
+          }
+        }));
+        setBuyerTransactions(txs);
+      })
+      .catch(err => console.error("Error transacciones comprador:", err));
 
-    return (
-        <div style={{padding: '20px'}}>
+    // Productos vendidos
+    fetch(`http://localhost:4000/products?sellerId=${id}`, { headers })
+      .then(res => res.json())
+      .then(data => setSoldProducts(data))
+      .catch(err => console.error("Error al obtener productos vendidos:", err));
 
-            <Card title={`${userData?.name}'s Profile`} style={{marginBottom: '20px'}}>
-                <Typography.Paragraph>Name: {userData?.name}</Typography.Paragraph>
-                <Typography.Paragraph>Email: {userData?.email}</Typography.Paragraph>
+  }, [id, apiKey]);
 
-            </Card>
+  return (
+    <Card title="Perfil del Usuario" style={{ maxWidth: 800, margin: '2rem auto' }}>
+      {id ? (
+        <>
+          {user ? (
+            <>
+              <Title level={4}>👤 {user.name || 'Nombre no disponible'}</Title>
+              <Paragraph>📧 {user.email}</Paragraph>
+            </>
+          ) : (
+            <Paragraph>Cargando usuario...</Paragraph>
+          )}
 
-            {/* Transacciones del Usuario */}
-            <Card title="Transactions" style={{marginBottom: '20px'}}>
-                <List
-                    bordered
-                    dataSource={userTransactions}
-                    renderItem={transaction => (
-                        <List.Item key={transaction.id}>
-                            <Typography.Text>
-                                Transaction ID: {transaction.id} - Price: €{transaction.productPrice}
-                            </Typography.Text>
-                        </List.Item>
-                    )}
-                />
-            </Card>
+          <Divider />
+          <Title level={5}>🧾 Transacciones como vendedor:</Title>
+          {sellerTransactions.length > 0 ? (
+            <List
+              bordered
+              dataSource={sellerTransactions}
+              renderItem={(item) => (
+                <List.Item>
+                  <strong>{item.title}</strong> — Comprador ID: {item.buyerId}
+                  <br />
+                  {item.product ? (
+                    <>
+                      🛍 {item.product.name} — 💰 ${item.product.price}
+                    </>
+                  ) : (
+                    <em>Producto no disponible</em>
+                  )}
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Paragraph>No hay transacciones como vendedor.</Paragraph>
+          )}
 
-            {/* Productos en Venta del Usuario */}
-            <Card title="Products for Sale">
-                <List
-                    bordered
-                    dataSource={userProducts}
-                    renderItem={product => (
-                        <List.Item key={product.id}>
-                            <Typography.Text>
-                                Product: {product.title} - Price: €{product.price}
-                            </Typography.Text>
-                        </List.Item>
-                    )}
-                />
-            </Card>
-        </div>
-    );
+          <Divider />
+          <Title level={5}>🛒 Transacciones como comprador:</Title>
+          {buyerTransactions.length > 0 ? (
+            <List
+              bordered
+              dataSource={buyerTransactions}
+              renderItem={(item) => (
+                <List.Item>
+                  <strong>{item.title}</strong> — Vendedor ID: {item.sellerId}
+                  <br />
+                  {item.product ? (
+                    <>
+                      🛍 {item.product.name} — 💰 ${item.product.price}
+                    </>
+                  ) : (
+                    <em>Producto no disponible</em>
+                  )}
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Paragraph>No hay transacciones como comprador.</Paragraph>
+          )}
+
+          <Divider />
+          <Title level={5}>📦 Productos vendidos:</Title>
+          {soldProducts.length > 0 ? (
+            <List
+              bordered
+              dataSource={soldProducts}
+              renderItem={(product) => (
+                <List.Item>
+                  <strong>{product.title}</strong> — 💵 ${product.price}
+                  <br />
+                  👤 Comprador: {product.buyerName} ({product.buyerEmail})
+                  <br />
+                  🗂 {product.description} — 📅 {new Date(product.date).toLocaleString()}
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Paragraph>No has vendido productos aún.</Paragraph>
+          )}
+        </>
+      ) : (
+        <Paragraph>No se encontró el ID del usuario en la URL.</Paragraph>
+      )}
+    </Card>
+  );
 };
 
-export default UserProfileComponent;
+export default UserTransactionsComponent;
