@@ -7,6 +7,8 @@ const DetailsProductComponent = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [product, setProduct] = useState({});
+    const [sellerName, setSellerName] = useState('');
+    const [sellerImage, setSellerImage] = useState('');
     const { Text } = Typography;
 
     useEffect(() => {
@@ -30,6 +32,22 @@ const DetailsProductComponent = () => {
             const existsImage = await checkURL(urlImage);
             jsonData.image = existsImage ? urlImage : "/imageMockup.png";
             setProduct(jsonData);
+
+            // Obtener datos del vendedor
+            if (jsonData.sellerId) {
+                const sellerResponse = await fetch(`${process.env.REACT_APP_BACKEND_BASE_URL}/users/${jsonData.sellerId}`, {
+                    method: "GET",
+                    headers: {
+                        "apikey": localStorage.getItem("apiKey")
+                    },
+                });
+
+                if (sellerResponse.ok) {
+                    const sellerData = await sellerResponse.json();
+                    setSellerName(sellerData.name);
+                    setSellerImage(sellerData.image || '');
+                }
+            }
         } else {
             const responseBody = await response.json();
             const serverErrors = responseBody.errors;
@@ -128,85 +146,71 @@ const DetailsProductComponent = () => {
 
                 {/* Contenido del producto */}
                 <Col xs={24} sm={24} md={12} lg={10}>
-    <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>
-        <h2 style={{ fontSize: '2.2em', fontWeight: 'bold', marginBottom: '20px' }}>
-            {product.title}
-        </h2>
+                    <div style={{ paddingLeft: '10px', paddingRight: '10px' }}>
+                        <h2 style={{ fontSize: '2.2em', fontWeight: 'bold', marginBottom: '20px' }}>
+                            {product.title}
+                        </h2>
 
-        <div style={{ marginBottom: '28px' }}>
-            <h4 style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Description</h4>
-            <p style={{ fontSize: '1.3em' }}>{product.description}</p>
-        </div>
+                        <div style={{ marginBottom: '28px' }}>
+                            <h4 style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Description</h4>
+                            <p style={{ fontSize: '1.3em' }}>{product.description}</p>
+                        </div>
 
-        <div style={{ marginBottom: '28px' }}>
-            <h4 style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Status</h4>
-            <p style={{ fontSize: '1.3em' }}>{labelProductPrice}</p>
-        </div>
+                        <div style={{ marginBottom: '28px' }}>
+                            <h4 style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Status</h4>
+                            <p style={{ fontSize: '1.3em' }}>{labelProductPrice}</p>
+                        </div>
 
-        <div style={{ marginBottom: '28px' }}>
-            <h4 style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Seller</h4>
-            <Link to={`/profile/${product.buyerId}`} style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#1890ff' }}>
-                <Avatar
-                    size="large"
-                    style={{ marginRight: '8px' }}
-                    src={product.sellerImage}
-                >
-                    {getInitials(product.buyerName || 'Unknown')}
-                </Avatar>
-                {product.buyerName || 'Unknown Seller'}
-            </Link>
-        </div>
+                        <div style={{ marginBottom: '28px' }}>
+                            <h4 style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Seller</h4>
+                            <Link to={`/sellerProfile/${product.sellerId}`} style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#1890ff' }}>
+                                <Avatar
+                                    size="large"
+                                    style={{ marginRight: '8px' }}
+                                    src={sellerImage}
+                                >
+                                    {getInitials(sellerName || 'Unknown')}
+                                </Avatar>
+                                {sellerName || 'Unknown Seller'}
+                            </Link>
+                        </div>
 
-        <div style={{ marginTop: '20px' }}>
-            <h3 style={{ fontSize: '2.4em', fontWeight: 'bold', textAlign: 'center', color: '#4CAF50' }}>
-                {product.price} €
-            </h3>
+                        <div style={{ marginTop: '20px' }}>
+                            <h3 style={{ fontSize: '2.4em', fontWeight: 'bold', textAlign: 'center', color: '#4CAF50' }}>
+                                {product.price} €
+                            </h3>
 
-            <Button
-                type="primary"
-                onClick={buyProduct}
-                icon={<ShoppingOutlined />}
-                size="large"
-                block
-                style={{ marginBottom: '12px', marginTop: '8px' }}
-            >
-                Buy Now
-            </Button>
-        </div>
+                            <Button
+                                type="primary"
+                                onClick={buyProduct}
+                                icon={<ShoppingOutlined />}
+                                size="large"
+                                block
+                                style={{ marginBottom: '12px', marginTop: '8px' }}
+                            >
+                                Buy Now
+                            </Button>
+                        </div>
 
-        <Button
-    type="link"
-    icon={<ArrowLeftOutlined />}
-    onClick={() => navigate(-1)}
-    style={{
-        marginTop: '12px',
-        display: 'block',
-        fontSize: '1.3em',
-        textAlign: 'right',
-        float: 'right',
-    }}
->
-    Go Back
-</Button>
-    </div>
-</Col>
+                        <Button
+                            type="link"
+                            icon={<ArrowLeftOutlined />}
+                            onClick={() => navigate(-1)}
+                            style={{
+                                marginTop: '12px',
+                                display: 'block',
+                                fontSize: '1.3em',
+                                textAlign: 'right',
+                                float: 'right',
+                            }}
+                        >
+                            Go Back
+                        </Button>
+                    </div>
+                </Col>
             </Row>
         </Card>
     );
 };
 
 export default DetailsProductComponent;
-
-
-
-
-
-
-
-
-
-
-
-
-
-

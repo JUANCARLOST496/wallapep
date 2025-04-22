@@ -78,8 +78,8 @@ const ListMyProductsComponent = () => {
                 { text: 'Venta', value: 'Venta' },
             ],
             onFilter: (value, record) => {
-                if (value === 'Compra') return record.buyerId === currentUserId;
-                if (value === 'Venta') return record.sellerId === currentUserId && record.buyerId;
+                if (value == 'Compra') return record.buyerId == currentUserId;
+                if (value == 'Venta') return record.sellerId == currentUserId && record.buyerId;
                 return true;
             },
             render: (_, record) => {
@@ -113,7 +113,7 @@ const ListMyProductsComponent = () => {
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
                             title="N.º de Compras"
-                            value={products.filter(p => p.buyerId === currentUserId).length}
+                            value={products.filter(p => p.buyerId == currentUserId).length}
                             valueStyle={{ color: '#cf1322', fontWeight: 'bold' }}
                         />
                     </Card>
@@ -123,7 +123,7 @@ const ListMyProductsComponent = () => {
                         <Statistic
                             title="Total Compras"
                             value={products
-                                .filter(p => p.buyerId === currentUserId)
+                                .filter(p => p.buyerId == currentUserId)
                                 .reduce((acc, product) => acc + (product.price || 0), 0)
                                 .toFixed(2)}
                             prefix="€"
@@ -135,7 +135,7 @@ const ListMyProductsComponent = () => {
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
                             title="N.º de Ventas"
-                            value={products.filter(p => p.sellerId === currentUserId && p.buyerId).length}
+                            value={products.filter(p => p.sellerId == currentUserId && p.buyerId).length}
                             valueStyle={{ color: '#3f8600', fontWeight: 'bold' }}
                         />
                     </Card>
@@ -145,7 +145,7 @@ const ListMyProductsComponent = () => {
                         <Statistic
                             title="Total Ventas"
                             value={products
-                                .filter(p => p.sellerId === currentUserId && p.buyerId)
+                                .filter(p => p.sellerId == currentUserId && p.buyerId)
                                 .reduce((acc, product) => acc + (product.price || 0), 0)
                                 .toFixed(2)}
                             prefix="€"

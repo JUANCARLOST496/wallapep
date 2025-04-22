@@ -21,6 +21,8 @@ import {
 import {useEffect, useState} from "react";
 import MainPage from "./main";
 import UserProfile from "./Components/User/UserProfile";
+import SellerProfile from "./Components/User/SellerProfile";
+
 
 let App = () => {
     const [api, contextHolder] = notification.useNotification();
@@ -220,6 +222,9 @@ let App = () => {
                         }></Route>
                         <Route path="/profile/:id" element={
                             <UserProfile />
+                        }></Route>
+                        <Route path="/SellerProfile/:id" element={
+                            <SellerProfile />
                         }></Route>
                     </Routes>
                 </div>

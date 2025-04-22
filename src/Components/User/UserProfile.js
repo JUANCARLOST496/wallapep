@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // ✅ Importa useParams
-import { Card, Typography, List, Divider } from 'antd';
+import { Card, Typography, List, Divider, Row, Col } from 'antd';
+import { UserOutlined, ShoppingCartOutlined, FileDoneOutlined, DollarOutlined, UserAddOutlined, FileTextOutlined, CalendarOutlined } from '@ant-design/icons';
 
 const { Title, Paragraph } = Typography;
 
-const UserTransactionsComponent = () => {
-  const { id } = useParams(); // ✅ Extrae el id de la URL
+const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [apiKey, setApiKey] = useState(null);
   const [sellerTransactions, setSellerTransactions] = useState([]);
   const [buyerTransactions, setBuyerTransactions] = useState([]);
   const [soldProducts, setSoldProducts] = useState([]);
+
+  const userId = localStorage.getItem('userId'); // Lee el userId del localStorage
 
   useEffect(() => {
     const storedApiKey = localStorage.getItem('apiKey');
@@ -18,7 +19,7 @@ const UserTransactionsComponent = () => {
   }, []);
 
   useEffect(() => {
-    if (!id || !apiKey) return;
+    if (!userId || !apiKey) return;
 
     const headers = {
       'Content-Type': 'application/json',
@@ -26,13 +27,13 @@ const UserTransactionsComponent = () => {
     };
 
     // Datos de usuario
-    fetch(`http://localhost:4000/users/${id}`, { headers })
+    fetch(`http://localhost:4000/users/${userId}`, { headers })
       .then(res => res.json())
       .then(data => setUser(data))
       .catch(err => console.error("Error al obtener el usuario:", err));
 
     // Transacciones como vendedor
-    fetch(`http://localhost:4000/transactions/public?sellerId=${id}`, { headers })
+    fetch(`http://localhost:4000/transactions/public?sellerId=${userId}`, { headers })
       .then(res => res.json())
       .then(async (data) => {
         const txs = await Promise.all(data.map(async (tx) => {
@@ -50,7 +51,7 @@ const UserTransactionsComponent = () => {
       .catch(err => console.error("Error transacciones vendedor:", err));
 
     // Transacciones como comprador
-    fetch(`http://localhost:4000/transactions/public?buyerId=${id}`, { headers })
+    fetch(`http://localhost:4000/transactions/public?buyerId=${userId}`, { headers })
       .then(res => res.json())
       .then(async (data) => {
         const txs = await Promise.all(data.map(async (tx) => {
@@ -68,99 +69,112 @@ const UserTransactionsComponent = () => {
       .catch(err => console.error("Error transacciones comprador:", err));
 
     // Productos vendidos
-    fetch(`http://localhost:4000/products?sellerId=${id}`, { headers })
+    fetch(`http://localhost:4000/products?sellerId=${userId}`, { headers })
       .then(res => res.json())
       .then(data => setSoldProducts(data))
       .catch(err => console.error("Error al obtener productos vendidos:", err));
 
-  }, [id, apiKey]);
+  }, [userId, apiKey]);
 
   return (
-    <Card title="Perfil del Usuario" style={{ maxWidth: 800, margin: '2rem auto' }}>
-      {id ? (
+    <Card title="Perfil del Usuario" style={{ maxWidth: '100%', margin: '2rem auto' }}>
+      {userId ? (
         <>
           {user ? (
-            <>
-              <Title level={4}>👤 {user.name || 'Nombre no disponible'}</Title>
-              <Paragraph>📧 {user.email}</Paragraph>
-            </>
+            <Row gutter={16} style={{ marginBottom: '1rem' }}>
+              <Col span={8}>
+                <Title level={4}><UserOutlined style={{ color: '#1890ff' }} /> {user.name || 'Nombre no disponible'}</Title>
+                <Paragraph><ShoppingCartOutlined style={{ color: '#52c41a' }} /> {user.email}</Paragraph>
+              </Col>
+            </Row>
           ) : (
             <Paragraph>Cargando usuario...</Paragraph>
           )}
 
           <Divider />
-          <Title level={5}>🧾 Transacciones como vendedor:</Title>
-          {sellerTransactions.length > 0 ? (
-            <List
-              bordered
-              dataSource={sellerTransactions}
-              renderItem={(item) => (
-                <List.Item>
-                  <strong>{item.title}</strong> — Comprador ID: {item.buyerId}
-                  <br />
-                  {item.product ? (
-                    <>
-                      🛍 {item.product.name} — 💰 ${item.product.price}
-                    </>
-                  ) : (
-                    <em>Producto no disponible</em>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Title level={5}><FileDoneOutlined style={{ color: '#ff4d4f' }} /> Transacciones como vendedor:</Title>
+              {sellerTransactions.length > 0 ? (
+                <List
+                  bordered
+                  dataSource={sellerTransactions}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <strong>{item.title}</strong>
+                      <br />
+                      {item.product ? (
+                        <>
+                          <span style={{ fontWeight: 'bold', color: '#1890ff' }}>{item.product.price}€</span>
+                        </>
+                      ) : (
+                        <em>Producto no disponible</em>
+                      )}
+                    </List.Item>
                   )}
-                </List.Item>
+                />
+              ) : (
+                <Paragraph>No hay transacciones como vendedor.</Paragraph>
               )}
-            />
-          ) : (
-            <Paragraph>No hay transacciones como vendedor.</Paragraph>
-          )}
+            </Col>
 
-          <Divider />
-          <Title level={5}>🛒 Transacciones como comprador:</Title>
-          {buyerTransactions.length > 0 ? (
-            <List
-              bordered
-              dataSource={buyerTransactions}
-              renderItem={(item) => (
-                <List.Item>
-                  <strong>{item.title}</strong> — Vendedor ID: {item.sellerId}
-                  <br />
-                  {item.product ? (
-                    <>
-                      🛍 {item.product.name} — 💰 ${item.product.price}
-                    </>
-                  ) : (
-                    <em>Producto no disponible</em>
+            <Col span={8}>
+              <Title level={5}><ShoppingCartOutlined style={{ color: '#fa8c16' }} /> Transacciones como comprador:</Title>
+              {buyerTransactions.length > 0 ? (
+                <List
+                  bordered
+                  dataSource={buyerTransactions}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <strong>{item.title}</strong>
+                      <br />
+                      {item.product ? (
+                        <>
+                          <span style={{ fontWeight: 'bold', color: '#1890ff' }}>{item.product.price}€</span>
+                        </>
+                      ) : (
+                        <em>Producto no disponible</em>
+                      )}
+                    </List.Item>
                   )}
-                </List.Item>
+                />
+              ) : (
+                <Paragraph>No hay transacciones como comprador.</Paragraph>
               )}
-            />
-          ) : (
-            <Paragraph>No hay transacciones como comprador.</Paragraph>
-          )}
+            </Col>
 
-          <Divider />
-          <Title level={5}>📦 Productos vendidos:</Title>
-          {soldProducts.length > 0 ? (
-            <List
-              bordered
-              dataSource={soldProducts}
-              renderItem={(product) => (
-                <List.Item>
-                  <strong>{product.title}</strong> — 💵 ${product.price}
-                  <br />
-                  👤 Comprador: {product.buyerName} ({product.buyerEmail})
-                  <br />
-                  🗂 {product.description} — 📅 {new Date(product.date).toLocaleString()}
-                </List.Item>
+            <Col span={8}>
+              <Title level={5}><DollarOutlined style={{ color: '#34a853' }} /> Productos vendidos:</Title>
+              {soldProducts.length > 0 ? (
+                <List
+                  bordered
+                  dataSource={soldProducts}
+                  renderItem={(product) => (
+                    <List.Item>
+                      <strong>{product.title}</strong> — 
+                      <span style={{ fontWeight: 'bold', color: '#1890ff' }}>{product.price}€</span>
+                      <br />
+                      <UserAddOutlined style={{ color: '#ff4d4f', marginRight: 8 }} /> Comprador: {product.buyerName} ({product.buyerEmail})
+                      <br />
+                      <FileTextOutlined style={{ color: '#fa8c16', marginRight: 8 }} /> {product.description} — 
+                      <CalendarOutlined style={{ color: '#1890ff', marginRight: 8 }} /> {new Date(product.date).toLocaleString()}
+                    </List.Item>
+                  )}
+                />
+              ) : (
+                <Paragraph>No has vendido productos aún.</Paragraph>
               )}
-            />
-          ) : (
-            <Paragraph>No has vendido productos aún.</Paragraph>
-          )}
+            </Col>
+          </Row>
         </>
       ) : (
-        <Paragraph>No se encontró el ID del usuario en la URL.</Paragraph>
+        <Paragraph>No se encontró el ID del usuario en el almacenamiento.</Paragraph>
       )}
     </Card>
   );
 };
 
-export default UserTransactionsComponent;
+export default UserProfile;
+
+
+
