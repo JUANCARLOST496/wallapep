@@ -112,19 +112,19 @@ const ListMyProductsComponent = () => {
             sorter: (a, b) => new Date(a.date) - new Date(b.date),
         },
         {
-            title: <div style={{ textAlign: 'center' }}>Estado de Venta</div>,
+            title: <div style={{ textAlign: 'center' }}>State of sale</div>,
             dataIndex: "buyerId",
             key: "estadoVenta",
             filters: [
-                { text: 'Vendido', value: true },
-                { text: 'No Vendido', value: false },
+                { text: 'Sold', value: true },
+                { text: 'Unsold', value: false },
             ],
             onFilter: (value, record) => Boolean(record.buyerId) === value,
             render: (buyerId) =>
                 buyerId ? (
-                    <Text strong style={{ color: 'green' }}>Vendido</Text>
+                    <Text strong style={{ color: 'green' }}>sold</Text>
                 ) : (
-                    <Text strong style={{ color: 'red' }}>No Vendido</Text>
+                    <Text strong style={{ color: 'red' }}>unsold</Text>
                 ),
             align: 'center',
         },
@@ -134,23 +134,31 @@ const ListMyProductsComponent = () => {
             responsive: ['sm'],
             render: (product) =>
                 product.buyerId ? (
-                    <Link to={`/user/${product.buyerId}`} style={{ fontSize: '15px', paddingLeft: '12px', paddingRight: '12px' }}>{product.buyerEmail}</Link>
+                    <Link to={`/SProfile/${product.buyerId}`} style={{ fontSize: '15px', paddingLeft: '12px', paddingRight: '12px' }}>{product.buyerName}</Link>
                 ) : (
                     <Text>-</Text>
                 ),
         },
         {
             title: <div style={{ textAlign: 'center' }}>Actions</div>,
-            dataIndex: "id",
-            render: (id) =>
-                <Space size="middle">
-                    <Link to={`/products/edit/${id}`} style={{ fontSize: '16px' }}>
-                        <EditOutlined /> Edit
-                    </Link>
-                    <a onClick={() => deleteProduct(id)} style={{ fontSize: '16px', color: 'red' }}>
-                        <DeleteOutlined /> Delete
-                    </a>
-                </Space>,
+    dataIndex: "id",
+    render: (id, product) =>
+        !product.buyerId ? (
+            // Si el producto no está vendido, mostramos las acciones de "Editar" y "Eliminar"
+            <Space size="middle">
+                <Link to={`/products/edit/${id}`} style={{ fontSize: '16px' }}>
+                    <EditOutlined /> Edit
+                </Link>
+                <a onClick={() => deleteProduct(id)} style={{ fontSize: '16px', color: 'red' }}>
+                    <DeleteOutlined /> Delete
+                </a>
+            </Space>
+        ) : (
+            // Si el producto está vendido, mostramos el mensaje
+            <Text style={{ color: 'grey' }}>
+                Sold, no longer possible to edit or delete
+            </Text>
+        ),
         },
     ];
     
@@ -163,7 +171,7 @@ const ListMyProductsComponent = () => {
                 <Col span={8}>
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
-                            title="Productos Listados"
+                            title="Product List"
                             value={products.length}
                             valueStyle={{ color: '#cf1322', fontWeight: 'bold' }}
                         />
@@ -172,7 +180,7 @@ const ListMyProductsComponent = () => {
                 <Col span={8}>
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
-                            title="Productos Vendidos"
+                            title="Sales"
                             value={getSoldProductsCount()}
                             valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
                         />
@@ -181,7 +189,7 @@ const ListMyProductsComponent = () => {
                 <Col span={8}>
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
-                            title="Ganancias Obtenidas"
+                            title="Earnings"
                             value={getTotalEarnings().toFixed(2)}
                             prefix="€"  
                             valueStyle={{ color: '#3f8600', fontWeight: 'bold' }}

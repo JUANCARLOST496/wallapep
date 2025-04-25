@@ -52,7 +52,7 @@ const DetailsProductComponent = () => {
             const responseBody = await response.json();
             const serverErrors = responseBody.errors;
             serverErrors.forEach(e => {
-                console.log("Error: " + e.msg);
+                
             });
         }
     };
@@ -163,7 +163,7 @@ const DetailsProductComponent = () => {
 
                         <div style={{ marginBottom: '28px' }}>
                             <h4 style={{ fontWeight: 'bold', fontSize: '1.5em' }}>Seller</h4>
-                            <Link to={`/sellerProfile/${product.sellerId}`} style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#1890ff' }}>
+                            <Link to={`/SProfile/${product.sellerId}`} style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#1890ff' }}>
                                 <Avatar
                                     size="large"
                                     style={{ marginRight: '8px' }}
@@ -214,3 +214,4 @@ const DetailsProductComponent = () => {
 };
 
 export default DetailsProductComponent;
+

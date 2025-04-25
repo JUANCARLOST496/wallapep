@@ -135,14 +135,18 @@ let CreateUserComponent = () => {
                             {/* Other Fields (Not Required) */}
                             <Row gutter={16}>
                                 <Col span={12}>
-                                    <Form.Item label="Name">
-                                        <Input
-                                            placeholder="Name"
-                                            value={formData.name}
-                                            onChange={(i) => handleFieldChange("name", i.currentTarget.value)}
-                                            style={{ padding: "10px", borderRadius: "4px", fontSize: "14px" }}
-                                        />
-                                    </Form.Item>
+                                <Form.Item
+    label="Name"
+    required
+    rules={[{ required: true, message: 'Please input your name!' }]}  // Reglas para hacer el campo obligatorio
+>
+    <Input
+        placeholder="Name"
+        value={formData.name}
+        onChange={(i) => handleFieldChange("name", i.currentTarget.value)}
+        style={{ padding: "10px", borderRadius: "4px", fontSize: "14px" }}
+    />
+</Form.Item>
                                 </Col>
                                 <Col span={12}>
                                     <Form.Item label="Surname">

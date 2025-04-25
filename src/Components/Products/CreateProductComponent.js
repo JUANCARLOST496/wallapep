@@ -51,7 +51,7 @@ let CreateProductComponent = () => {
             let responseBody = await response.json();
             let serverErrors = responseBody.errors;
             serverErrors.forEach(e => {
-                console.log("Error: " + e.msg);
+              
             });
         }
     };

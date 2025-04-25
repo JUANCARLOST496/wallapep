@@ -24,8 +24,7 @@ let MainPage = () => {
 
     useEffect(() => {
         if (isLoggedIn) {
-            console.log("Usuario logueado:", userEmail);
-            console.log("ID del usuario:", userId);
+           
             getRandomImageByCategory("Electronics", "electronics");
             getRandomImageByCategory("Clothing and Fashion", "clothing");
             getRandomImageByCategory("Home and Kitchen", "kitchen");

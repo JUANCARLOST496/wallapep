@@ -71,15 +71,15 @@ const ListMyProductsComponent = () => {
             sorter: (a, b) => new Date(a.date) - new Date(b.date),
         },
         {
-            title: <div style={{ textAlign: 'center' }}>Estado</div>,
-            key: "estadoVenta",
+            title: <div style={{ textAlign: 'center' }}>Status</div>,
+            key: "estadosale",
             filters: [
-                { text: 'Compra', value: 'Compra' },
-                { text: 'Venta', value: 'Venta' },
+                { text: 'purchase', value: 'purchase' },
+                { text: 'sale', value: 'sale' },
             ],
             onFilter: (value, record) => {
-                if (value == 'Compra') return record.buyerId == currentUserId;
-                if (value == 'Venta') return record.sellerId == currentUserId && record.buyerId;
+                if (value == 'purchase') return record.buyerId == currentUserId;
+                if (value == 'sale') return record.sellerId == currentUserId && record.buyerId;
                 return true;
             },
             render: (_, record) => {
@@ -90,11 +90,11 @@ const ListMyProductsComponent = () => {
                 console.log("buyerId:", buyerId, "sellerId:", sellerId, "currentUserId:", currentUserId);
             
                 if (buyerId == currentUserId) {
-                    console.log("Compra: El buyerId coincide con el currentUserId");
-                    return <Text strong style={{ color: 'red' }}>Compra</Text>;
+                    console.log("purchase: El buyerId coincide con el currentUserId");
+                    return <Text strong style={{ color: 'red' }}>purchase</Text>;
                 } else if (sellerId == currentUserId && buyerId) {
-                    console.log("Venta: El sellerId coincide con el currentUserId y hay un buyerId");
-                    return <Text strong style={{ color: 'green' }}>Venta</Text>;
+                    console.log("sale: El sellerId coincide con el currentUserId y hay un buyerId");
+                    return <Text strong style={{ color: 'green' }}>sale</Text>;
                 } else {
                     console.log("Estado no encontrado");
                     return <Text type="secondary">—</Text>;
@@ -112,7 +112,7 @@ const ListMyProductsComponent = () => {
                 <Col span={6}>
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
-                            title="N.º de Compras"
+                            title="N.º de purchases"
                             value={products.filter(p => p.buyerId == currentUserId).length}
                             valueStyle={{ color: '#cf1322', fontWeight: 'bold' }}
                         />
@@ -121,7 +121,7 @@ const ListMyProductsComponent = () => {
                 <Col span={6}>
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
-                            title="Total Compras"
+                            title="Total purchases"
                             value={products
                                 .filter(p => p.buyerId == currentUserId)
                                 .reduce((acc, product) => acc + (product.price || 0), 0)
@@ -134,7 +134,7 @@ const ListMyProductsComponent = () => {
                 <Col span={6}>
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
-                            title="N.º de Ventas"
+                            title="N.º de sales"
                             value={products.filter(p => p.sellerId == currentUserId && p.buyerId).length}
                             valueStyle={{ color: '#3f8600', fontWeight: 'bold' }}
                         />
@@ -143,7 +143,7 @@ const ListMyProductsComponent = () => {
                 <Col span={6}>
                     <Card bordered={false} style={{ backgroundColor: '#f7f7f7', textAlign: 'center' }}>
                         <Statistic
-                            title="Total Ventas"
+                            title="Total sales"
                             value={products
                                 .filter(p => p.sellerId == currentUserId && p.buyerId)
                                 .reduce((acc, product) => acc + (product.price || 0), 0)

@@ -21,7 +21,7 @@ import {
 import {useEffect, useState} from "react";
 import MainPage from "./main";
 import UserProfile from "./Components/User/UserProfile";
-import SellerProfile from "./Components/User/SellerProfile";
+import SProfile from "./Components/User/SProfile";
 
 
 let App = () => {
@@ -56,7 +56,7 @@ let App = () => {
             // Asigna el sellerId de la primera transacción (o ajusta según tu lógica)
             if (jsonData.length > 0) {
                 setSellerId(jsonData[0].sellerId);
-                console.log("Seller ID:", jsonData[0].sellerId);
+                
             }
         }
     };
@@ -223,8 +223,8 @@ let App = () => {
                         <Route path="/profile/:id" element={
                             <UserProfile />
                         }></Route>
-                        <Route path="/SellerProfile/:id" element={
-                            <SellerProfile />
+                        <Route path="/SProfile/:id" element={
+                            <SProfile />
                         }></Route>
                     </Routes>
                 </div>
